@@ -1,0 +1,26 @@
+# Compiled class files
+build/
+*.class
+
+# Large binary libraries and JARs (downloaded automatically on build/run)
+lib/
+ReservationSystem.jar
+
+# Database (auto-created and seeded upon application launch)
+reservation.db
+
+# IDE and Editor files
+.idea/
+.vscode/
+*.iml
+.settings/
+.project
+.classpath
+
+# OS generated files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Log files
+*.log

@@ -1,0 +1,4 @@
+Main-Class: com.reservation.Main
+Class-Path: lib/sqlite-jdbc.jar lib/slf4j-api.jar lib/slf4j-nop.jar
+
+
