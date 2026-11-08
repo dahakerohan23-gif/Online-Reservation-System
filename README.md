@@ -4,6 +4,21 @@ A modern, desktop-based train and transport reservation system built using **Jav
 
 ---
 
+## 🌐 Live Web Edition & Vercel Deployment
+
+In addition to the desktop Java application, a modern **Live Web Edition** (`index.html`, `app.js`, `vercel.json`) is included for web browsers and cloud deployment on **Vercel**:
+
+### Deploy to Vercel in 1 Minute:
+1. Go to **[vercel.com](https://vercel.com)** and sign in with your GitHub account (`dahakerohan23-gif`).
+2. Click **"Add New..."** ➔ **"Project"**.
+3. Select your repository: **`Online-Reservation-System`**.
+4. Leave Framework Preset as **"Other"** (Root directory `./`).
+5. Click **"Deploy"**.
+6. Within 10 seconds, Vercel will give you a live production URL:
+   `https://online-reservation-system-<your-name>.vercel.app`
+
+---
+
 ## 📋 Feature Checklist Coverage
 
 - [x] **Login Form**: Username and password fields, SHA-256 hashed password verification, inline and dialog error messages for invalid credentials, plus a user registration modal.

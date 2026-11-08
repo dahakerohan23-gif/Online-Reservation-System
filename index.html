@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🚆 Online Reservation System | RailReserve Portal</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            rail: {
+              50: '#F0F4FA',
+              100: '#D9E3F3',
+              200: '#B3C8E8',
+              500: '#2563EB',
+              700: '#1D4ED8',
+              800: '#1E3A8A',
+              900: '#172554',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .tab-active {
+      border-bottom: 3px solid #2563EB;
+      color: #1E3A8A;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 flex flex-col justify-between antialiased">
+
+  <!-- ==================== 1. LOGIN SCREEN ==================== -->
+  <div id="loginSection" class="min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-200/80 w-full max-w-md overflow-hidden transition-all duration-300">
+      <!-- Card Header -->
+      <div class="bg-gradient-to-r from-rail-900 via-rail-800 to-rail-700 px-8 py-8 text-center text-white relative">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md mb-3 ring-1 ring-white/20 shadow-inner">
+          <i data-lucide="train" class="w-8 h-8 text-white"></i>
+        </div>
+        <h1 class="text-2xl font-bold tracking-tight">Online Reservation System</h1>
+        <p class="text-xs text-blue-200 mt-1">Railway Ticket Booking & PNR Management Portal</p>
+      </div>
+
+      <!-- Card Body -->
+      <div class="p-8">
+        <!-- Error Alert -->
+        <div id="loginAlert" class="hidden mb-5 p-3.5 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-start gap-2.5">
+          <i data-lucide="alert-circle" class="w-5 h-5 text-red-500 shrink-0 mt-0.5"></i>
+          <div>
+            <span class="font-semibold" id="loginAlertTitle">Access Denied!</span>
+            <p class="text-xs text-red-600 mt-0.5" id="loginAlertMessage">Invalid username or password.</p>
+          </div>
+        </div>
+
+        <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Username</label>
+            <div class="relative">
+              <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+              <input type="text" id="loginUsername" required placeholder="e.g. admin or rohan"
+                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rail-500 focus:bg-white transition-all">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Password</label>
+            <div class="relative">
+              <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+              <input type="password" id="loginPassword" required placeholder="Enter password"
+                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rail-500 focus:bg-white transition-all">
+            </div>
+          </div>
+
+          <button type="submit"
+            class="w-full py-2.5 px-4 bg-rail-800 hover:bg-rail-700 active:scale-[0.99] text-white font-medium text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 mt-2">
+            <span>Sign In to Account</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </form>
+
+        <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+          <span class="text-slate-500">Need an account?</span>
+          <button onclick="openRegisterModal()" class="text-rail-700 hover:text-rail-900 font-semibold hover:underline">Register New User</button>
+        </div>
+
+        <!-- Demo Accounts Box -->
+        <div class="mt-5 p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl">
+          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">⚡ Quick 1-Click Demo Logins:</p>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="quickFillLogin('admin', 'admin123')" type="button"
+              class="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-100 hover:border-slate-300 text-left transition flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-purple-600"></span>
+              <span><strong>admin</strong> / admin123</span>
+            </button>
+            <button onclick="quickFillLogin('rohan', 'pass123')" type="button"
+              class="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-100 hover:border-slate-300 text-left transition flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+              <span><strong>rohan</strong> / pass123</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 2. MAIN APPLICATION DASHBOARD ==================== -->
+  <div id="appSection" class="hidden min-h-screen flex flex-col">
+    <!-- Navbar Header -->
+    <header class="bg-gradient-to-r from-rail-900 via-rail-800 to-rail-700 text-white shadow-lg sticky top-0 z-30">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <!-- Brand -->
+          <div class="flex items-center gap-3">
+            <div class="p-2 bg-white/10 rounded-xl ring-1 ring-white/20">
+              <i data-lucide="train" class="w-6 h-6 text-white"></i>
+            </div>
+            <div>
+              <div class="font-bold text-lg tracking-tight leading-tight flex items-center gap-2">
+                <span>RailReserve</span>
+                <span class="bg-blue-400/20 text-blue-200 text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full border border-blue-400/30">Live Portal</span>
+              </div>
+              <p class="text-[11px] text-blue-200/80 leading-none">Online Train Reservation & PNR Management System</p>
+            </div>
+          </div>
+
+          <!-- User Info & Logout -->
+          <div class="flex items-center gap-3">
+            <div class="hidden sm:flex items-center gap-2 bg-white/10 border border-white/10 px-3 py-1.5 rounded-xl text-xs">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span id="navUserName" class="font-medium">User</span>
+              <span id="navUserRole" class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded text-blue-100 uppercase font-semibold">User</span>
+            </div>
+            <button onclick="handleLogout()" class="px-3 py-1.5 bg-red-600/80 hover:bg-red-600 active:scale-95 text-white text-xs font-semibold rounded-xl transition flex items-center gap-1.5 border border-red-500/50">
+              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+              <span>Log Out</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs Bar -->
+      <div class="bg-white border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav class="flex space-x-2 sm:space-x-8 overflow-x-auto text-sm" aria-label="Tabs">
+            <button onclick="switchTab('bookingTab')" id="btnBookingTab" class="tab-btn tab-active py-3 px-3 inline-flex items-center gap-2 border-b-2 font-medium transition text-slate-700">
+              <i data-lucide="ticket" class="w-4 h-4 text-rail-500"></i>
+              <span>Reservation Form</span>
+            </button>
+            <button onclick="switchTab('cancelTab')" id="btnCancelTab" class="tab-btn py-3 px-3 inline-flex items-center gap-2 border-b-2 border-transparent font-medium transition text-slate-500 hover:text-slate-800">
+              <i data-lucide="x-circle" class="w-4 h-4 text-red-500"></i>
+              <span>Cancellation Form</span>
+            </button>
+            <button onclick="switchTab('myBookingsTab')" id="btnMyBookingsTab" class="tab-btn py-3 px-3 inline-flex items-center gap-2 border-b-2 border-transparent font-medium transition text-slate-500 hover:text-slate-800">
+              <i data-lucide="table" class="w-4 h-4 text-emerald-600"></i>
+              <span>My Bookings / All Records</span>
+              <span id="bookingCountBadge" class="ml-1 text-[11px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded-full font-bold">0</span>
+            </button>
+            <button onclick="switchTab('trainsTab')" id="btnTrainsTab" class="tab-btn py-3 px-3 inline-flex items-center gap-2 border-b-2 border-transparent font-medium transition text-slate-500 hover:text-slate-800">
+              <i data-lucide="clock" class="w-4 h-4 text-indigo-600"></i>
+              <span>Train Schedule Directory</span>
+            </button>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+
+      <!-- ==================== TAB 1: RESERVATION FORM ==================== -->
+      <section id="bookingTab" class="tab-content">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <!-- Card Header -->
+          <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <i data-lucide="calendar" class="w-5 h-5 text-rail-500"></i>
+                <span>Book Ticket / New Reservation</span>
+              </h2>
+              <p class="text-xs text-slate-500 mt-0.5">Fill in the journey details. Train name will auto-populate as soon as you enter the train number.</p>
+            </div>
+            <button onclick="openTrainPickerModal()" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl border border-slate-300 transition">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500"></i>
+              <span>Browse Train Directory</span>
+            </button>
+          </div>
+
+          <!-- Form Grid -->
+          <form id="reservationForm" onsubmit="handleReservationSubmit(event)" class="p-6 sm:p-8 space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+              <!-- 1. Passenger Name -->
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Passenger Name <span class="text-red-500">*</span></label>
+                <div class="relative">
+                  <i data-lucide="user-check" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+                  <input type="text" id="resPassengerName" required placeholder="Enter passenger full name"
+                    class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rail-500 focus:bg-white transition">
+                </div>
+              </div>
+
+              <!-- 2. Train Number & Lookup -->
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">Train Number <span class="text-red-500">*</span></label>
+                  <span id="trainLookupBadge" class="text-[11px] text-slate-500 font-medium">Type: 12001, 12951, 22436</span>
+                </div>
+                <div class="relative">
+                  <i data-lucide="hash" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+                  <input type="number" id="resTrainNumber" required placeholder="e.g. 12001" oninput="handleTrainNumberInput(this.value)"
+                    class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-rail-500 focus:bg-white transition">
+                </div>
+              </div>
+
+              <!-- 3. Train Name (Auto-populated) -->
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                  Train Name <span class="text-blue-600 font-normal normal-case">(Auto-populated from Train No.)</span> <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                  <i data-lucide="tag" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+                  <input type="text" id="resTrainName" readonly required placeholder="Enter train number above to auto-populate"
+                    class="w-full pl-10 pr-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 cursor-not-allowed">
+                </div>
+              </div>
+
+              <!-- 4. Class Type -->
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Class Type <span class="text-red-500">*</span></label>
+                <div class="relative">
+                  <i data-lucide="layers" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+                  <select id="resClassType" required
+                    class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rail-500 focus:bg-white transition">
+                    <option value="1A - AC First Class">1A - AC First Class</option>
+                    <option value="2A - AC 2-Tier" selected>2A - AC 2-Tier</option>
+                    <option value="3A - AC 3-Tier">3A - AC 3-Tier</option>
+                    <option value="SL - Sleeper Class">SL - Sleeper Class</option>
+                    <option value="CC - AC Chair Car">CC - AC Chair Car</option>
+                    <option value="EC - Executive Chair Car">EC - Executive Chair Car</option>
+                    <option value="2S - Second Sitting">2S - Second Sitting</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- 5. Date of Journey -->
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">Date of Journey (YYYY-MM-DD) <span class="text-red-500">*</span></label>
+                  <div class="space-x-1">
+                    <button type="button" onclick="setQuickDate(0)" class="text-[10px] px-1.5 py-0.5 bg-slate-100 hover:bg-slate-200 rounded font-medium text-slate-600">Today</button>
+                    <button type="button" onclick="setQuickDate(1)" class="text-[10px] px-1.5 py-0.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded font-medium">+1 Day</button>
+                    <button type="button" onclick="setQuickDate(7)" class="text-[10px] px-1.5 py-0.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded font-medium">+7 Days</button>
+                  </div>
+                </div>
+                <div class="relative">
+                  <i data-lucide="calendar" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+                  <input type="date" id="resJourneyDate" required
+                    class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rail-500 focus:bg-white transition">
+                </div>
+              </div>
+
+              <!-- 6. Source Station -->
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Source Station <span class="text-red-500">*</span></label>
+                <div class="relative">
+                  <i data-lucide="map-pin" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+                  <input type="text" id="resSource" required placeholder="e.g. New Delhi"
+                    class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rail-500 focus:bg-white transition">
+                </div>
+              </div>
+
+              <!-- 7. Destination Station -->
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Destination Station <span class="text-red-500">*</span></label>
+                <div class="relative">
+                  <i data-lucide="navigation" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+                  <input type="text" id="resDestination" required placeholder="e.g. Bhopal Junction"
+                    class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rail-500 focus:bg-white transition">
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="pt-6 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-end gap-3">
+              <button type="button" onclick="resetReservationForm()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition">
+                Reset Form
+              </button>
+              <button type="submit" class="px-6 py-2.5 bg-rail-800 hover:bg-rail-700 active:scale-95 text-white text-sm font-semibold rounded-xl shadow-md transition flex items-center justify-center gap-2">
+                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                <span>Book Ticket (Generate PNR)</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 2: CANCELLATION FORM ==================== -->
+      <section id="cancelTab" class="tab-content hidden">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="p-6 border-b border-slate-100">
+            <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="x-circle" class="w-5 h-5 text-red-500"></i>
+              <span>Ticket Cancellation Form</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">Enter your 10-digit PNR number to fetch booking details and confirm cancellation.</p>
+          </div>
+
+          <div class="p-6 sm:p-8 space-y-6">
+            <!-- PNR Lookup Form -->
+            <form onsubmit="handleFetchPNR(event)" class="flex flex-col sm:flex-row gap-3">
+              <div class="relative flex-1">
+                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+                <input type="text" id="cancelPnrInput" required placeholder="Enter 10-Digit PNR Number (e.g. 8429104852)"
+                  class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-rail-500 focus:bg-white transition">
+              </div>
+              <button type="submit" class="px-5 py-2.5 bg-rail-800 hover:bg-rail-700 text-white text-sm font-semibold rounded-xl shadow transition flex items-center justify-center gap-2">
+                <i data-lucide="file-search" class="w-4 h-4"></i>
+                <span>Fetch Details</span>
+              </button>
+            </form>
+
+            <!-- Cancellation Result Details Card -->
+            <div id="cancellationResultCard" class="hidden rounded-2xl border border-slate-200 bg-slate-50 p-6 space-y-5">
+              <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+                <div>
+                  <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">PNR Number</span>
+                  <div class="text-2xl font-bold font-mono text-rail-900 mt-0.5" id="cancelCardPnr">-</div>
+                </div>
+                <span id="cancelCardStatusBadge" class="px-3 py-1 bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold rounded-full">
+                  CONFIRMED
+                </span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <span class="text-xs text-slate-500 font-medium">Passenger Name:</span>
+                  <p class="font-bold text-slate-800" id="cancelCardPassenger">-</p>
+                </div>
+                <div>
+                  <span class="text-xs text-slate-500 font-medium">Train Number & Name:</span>
+                  <p class="font-bold text-slate-800" id="cancelCardTrain">-</p>
+                </div>
+                <div>
+                  <span class="text-xs text-slate-500 font-medium">Class:</span>
+                  <p class="font-bold text-slate-800" id="cancelCardClass">-</p>
+                </div>
+                <div>
+                  <span class="text-xs text-slate-500 font-medium">Date of Journey:</span>
+                  <p class="font-bold text-slate-800" id="cancelCardDate">-</p>
+                </div>
+                <div>
+                  <span class="text-xs text-slate-500 font-medium">Route:</span>
+                  <p class="font-bold text-slate-800" id="cancelCardRoute">-</p>
+                </div>
+                <div>
+                  <span class="text-xs text-slate-500 font-medium">Booked By:</span>
+                  <p class="font-bold text-slate-800" id="cancelCardBookedBy">-</p>
+                </div>
+              </div>
+
+              <!-- Cancel Button -->
+              <div class="pt-4 border-t border-slate-200 flex justify-end">
+                <button type="button" onclick="promptConfirmCancellation()"
+                  class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl shadow transition flex items-center gap-2">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  <span>Confirm Cancellation</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Empty / Info State -->
+            <div id="cancellationEmptyState" class="text-center py-12 px-4 border-2 border-dashed border-slate-200 rounded-2xl">
+              <i data-lucide="file-question" class="w-12 h-12 text-slate-300 mx-auto mb-3"></i>
+              <h3 class="text-sm font-bold text-slate-700">No Booking Details Loaded</h3>
+              <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Enter your 10-digit PNR number above and click "Fetch Details" to inspect the booking before cancellation.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 3: MY BOOKINGS / ALL RECORDS ==================== -->
+      <section id="myBookingsTab" class="tab-content hidden">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <i data-lucide="list" class="w-5 h-5 text-emerald-600"></i>
+                <span>Reservation Records</span>
+              </h2>
+              <p class="text-xs text-slate-500 mt-0.5" id="bookingsFilterNote">Displaying all active ticket reservations stored in database.</p>
+            </div>
+
+            <!-- Search Filter -->
+            <div class="flex items-center gap-2">
+              <div class="relative">
+                <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3"></i>
+                <input type="text" id="bookingsSearchInput" oninput="filterBookingsTable(this.value)" placeholder="Search PNR or Passenger..."
+                  class="pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-rail-500 focus:bg-white w-52 sm:w-64 transition">
+              </div>
+              <button onclick="renderBookingsTable()" class="p-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-700 transition" title="Refresh">
+                <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase font-semibold">
+                <tr>
+                  <th class="py-3 px-4">PNR</th>
+                  <th class="py-3 px-4">Passenger</th>
+                  <th class="py-3 px-4">Train Details</th>
+                  <th class="py-3 px-4">Class</th>
+                  <th class="py-3 px-4">Journey Date</th>
+                  <th class="py-3 px-4">Route</th>
+                  <th class="py-3 px-4 text-center">Status</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="bookingsTableBody" class="divide-y divide-slate-100 text-slate-700">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+
+          <div id="bookingsTableEmpty" class="hidden text-center py-12">
+            <i data-lucide="inbox" class="w-10 h-10 text-slate-300 mx-auto mb-2"></i>
+            <p class="text-xs font-semibold text-slate-500">No reservations found matching your criteria.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 4: TRAIN DIRECTORY ==================== -->
+      <section id="trainsTab" class="tab-content hidden">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <i data-lucide="compass" class="w-5 h-5 text-indigo-600"></i>
+                <span>Train Schedule & Route Directory</span>
+              </h2>
+              <p class="text-xs text-slate-500 mt-0.5">Click "Book This Train" on any schedule to automatically populate the reservation form.</p>
+            </div>
+            <div class="relative">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3"></i>
+              <input type="text" id="trainDirectorySearch" oninput="filterTrainDirectory(this.value)" placeholder="Filter by train or station..."
+                class="pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-rail-500 focus:bg-white w-52 sm:w-64 transition">
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase font-semibold">
+                <tr>
+                  <th class="py-3 px-4 text-center">Train No.</th>
+                  <th class="py-3 px-4">Train Name</th>
+                  <th class="py-3 px-4">Origin Station</th>
+                  <th class="py-3 px-4">Destination Station</th>
+                  <th class="py-3 px-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="trainDirectoryBody" class="divide-y divide-slate-100 text-slate-700">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- App Footer -->
+    <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-500 flex items-center justify-between px-6">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span>Storage: LocalStorage Database (SQLite-compatible engine)</span>
+      </div>
+      <div>
+        <span>Online Reservation System · Task 1</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- Modal 1: Booking Confirmation Modal -->
+  <div id="confirmationModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
+      <!-- Success Badge Header -->
+      <div class="bg-emerald-600 p-6 text-center text-white">
+        <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-3 ring-2 ring-white/30">
+          <i data-lucide="check" class="w-8 h-8 text-white"></i>
+        </div>
+        <h3 class="text-xl font-bold">Booking Confirmed!</h3>
+        <p class="text-xs text-emerald-100 mt-0.5">Your ticket has been generated and saved to the database.</p>
+      </div>
+
+      <!-- PNR Display Banner -->
+      <div class="bg-emerald-50 border-b border-emerald-100 p-4 text-center">
+        <span class="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Unique 10-Digit PNR Number:</span>
+        <div class="flex items-center justify-center gap-2 mt-1">
+          <span class="text-2xl font-extrabold font-mono text-emerald-900 tracking-wider" id="modalPnrValue">0000000000</span>
+          <button onclick="copyPnrToClipboard()" class="p-1.5 hover:bg-emerald-100 text-emerald-700 rounded-lg transition" title="Copy PNR">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Details Summary Grid -->
+      <div class="p-6 space-y-3 text-xs">
+        <div class="flex justify-between py-1 border-b border-slate-100">
+          <span class="text-slate-500 font-medium">Passenger Name:</span>
+          <span class="font-bold text-slate-800" id="modalPassenger">-</span>
+        </div>
+        <div class="flex justify-between py-1 border-b border-slate-100">
+          <span class="text-slate-500 font-medium">Train:</span>
+          <span class="font-bold text-slate-800 text-right" id="modalTrain">-</span>
+        </div>
+        <div class="flex justify-between py-1 border-b border-slate-100">
+          <span class="text-slate-500 font-medium">Class Type:</span>
+          <span class="font-bold text-slate-800" id="modalClass">-</span>
+        </div>
+        <div class="flex justify-between py-1 border-b border-slate-100">
+          <span class="text-slate-500 font-medium">Date of Journey:</span>
+          <span class="font-bold text-slate-800" id="modalDate">-</span>
+        </div>
+        <div class="flex justify-between py-1 border-b border-slate-100">
+          <span class="text-slate-500 font-medium">Route:</span>
+          <span class="font-bold text-slate-800 text-right" id="modalRoute">-</span>
+        </div>
+        <div class="flex justify-between py-1">
+          <span class="text-slate-500 font-medium">Booking Status:</span>
+          <span class="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">CONFIRMED</span>
+        </div>
+      </div>
+
+      <!-- Footer Buttons -->
+      <div class="p-4 bg-slate-50 border-t border-slate-100 flex gap-2">
+        <button onclick="window.print()" class="flex-1 py-2 px-3 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl transition flex items-center justify-center gap-1.5">
+          <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+          <span>Print Ticket</span>
+        </button>
+        <button onclick="closeConfirmationModal()" class="flex-1 py-2 px-3 bg-rail-800 hover:bg-rail-700 text-white text-xs font-semibold rounded-xl transition">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: "Are you sure?" Cancellation Dialog -->
+  <div id="cancelConfirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-200 p-6 text-center">
+      <div class="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-red-600">
+        <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+      </div>
+      <h3 class="text-lg font-bold text-slate-900">Are you sure?</h3>
+      <p class="text-xs text-slate-500 mt-1.5">
+        Are you sure you want to cancel booking for PNR <strong class="font-mono text-slate-800" id="cancelDialogPnr">0000000000</strong>? This action will permanently remove the booking from the database.
+      </p>
+      <div class="mt-6 flex gap-3">
+        <button onclick="closeCancelConfirmModal()" class="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition">
+          No, Keep It
+        </button>
+        <button onclick="executeCancellation()" class="flex-1 py-2 px-3 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-xl shadow transition">
+          Yes, Cancel Booking
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Register New User -->
+  <div id="registerModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="bg-slate-900 p-5 text-white flex items-center justify-between">
+        <h3 class="font-bold text-base flex items-center gap-2">
+          <i data-lucide="user-plus" class="w-5 h-5 text-blue-400"></i>
+          <span>Create New Account</span>
+        </h3>
+        <button onclick="closeRegisterModal()" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form onsubmit="handleRegisterSubmit(event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
+          <input type="text" id="regFullName" required placeholder="e.g. Priya Sharma"
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-rail-500 focus:bg-white outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Username</label>
+          <input type="text" id="regUsername" required placeholder="Choose a unique username"
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-rail-500 focus:bg-white outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+          <input type="password" id="regPassword" required placeholder="Create password"
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-rail-500 focus:bg-white outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Confirm Password</label>
+          <input type="password" id="regConfirmPassword" required placeholder="Re-enter password"
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-rail-500 focus:bg-white outline-none">
+        </div>
+        <div class="pt-2">
+          <button type="submit" class="w-full py-2.5 bg-rail-800 hover:bg-rail-700 text-white text-xs font-semibold rounded-xl shadow transition">
+            Register Account
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 4: Train Picker Modal -->
+  <div id="trainPickerModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[80vh]">
+      <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <h3 class="font-bold text-sm text-slate-800">Select Train from Schedule</h3>
+        <button onclick="closeTrainPickerModal()" class="text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div class="p-3 border-b border-slate-100">
+        <input type="text" id="pickerFilterInput" oninput="filterPickerList(this.value)" placeholder="Search train..."
+          class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-rail-500">
+      </div>
+      <div class="overflow-y-auto flex-1 divide-y divide-slate-100" id="pickerListContainer">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastNotification" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 max-w-sm bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 text-xs">
+    <i data-lucide="info" id="toastIcon" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toastMessage">Notification message</span>
+  </div>
+
+  <!-- JavaScript -->
+  <script src="app.js"></script>
+  <script>
+    // Initialize Lucide icons on page load
+    lucide.createIcons();
+  </script>
+</body>
+</html>
