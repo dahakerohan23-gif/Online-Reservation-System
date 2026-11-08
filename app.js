@@ -5,6 +5,17 @@
  * Persistent LocalStorage Database.
  */
 
+// Safe Icon Helper
+function safeCreateIcons() {
+  if (window.lucide && typeof lucide.createIcons === 'function') {
+    try {
+      lucide.createIcons();
+    } catch (e) {
+      console.warn("Lucide icons warning:", e);
+    }
+  }
+}
+
 // ==================== DEFAULT SEED DATA ====================
 const DEFAULT_TRAINS = [
   { number: 12001, name: "Shatabdi Express", source: "New Delhi", destination: "Bhopal Junction" },
@@ -59,19 +70,27 @@ const DEFAULT_BOOKINGS = [
 // ==================== STORAGE CONTROLLER ====================
 class Database {
   static init() {
-    if (!localStorage.getItem("rail_users")) {
-      localStorage.setItem("rail_users", JSON.stringify(DEFAULT_USERS));
-    }
-    if (!localStorage.getItem("rail_trains")) {
-      localStorage.setItem("rail_trains", JSON.stringify(DEFAULT_TRAINS));
-    }
-    if (!localStorage.getItem("rail_bookings")) {
-      localStorage.setItem("rail_bookings", JSON.stringify(DEFAULT_BOOKINGS));
+    try {
+      if (!localStorage.getItem("rail_users")) {
+        localStorage.setItem("rail_users", JSON.stringify(DEFAULT_USERS));
+      }
+      if (!localStorage.getItem("rail_trains")) {
+        localStorage.setItem("rail_trains", JSON.stringify(DEFAULT_TRAINS));
+      }
+      if (!localStorage.getItem("rail_bookings")) {
+        localStorage.setItem("rail_bookings", JSON.stringify(DEFAULT_BOOKINGS));
+      }
+    } catch (e) {
+      console.warn("Storage error:", e);
     }
   }
 
   static getUsers() {
-    return JSON.parse(localStorage.getItem("rail_users") || "[]");
+    try {
+      return JSON.parse(localStorage.getItem("rail_users") || "[]");
+    } catch (e) {
+      return DEFAULT_USERS;
+    }
   }
 
   static saveUser(user) {
@@ -81,11 +100,19 @@ class Database {
   }
 
   static getTrains() {
-    return JSON.parse(localStorage.getItem("rail_trains") || "[]");
+    try {
+      return JSON.parse(localStorage.getItem("rail_trains") || "[]");
+    } catch (e) {
+      return DEFAULT_TRAINS;
+    }
   }
 
   static getBookings() {
-    return JSON.parse(localStorage.getItem("rail_bookings") || "[]");
+    try {
+      return JSON.parse(localStorage.getItem("rail_bookings") || "[]");
+    } catch (e) {
+      return DEFAULT_BOOKINGS;
+    }
   }
 
   static saveBooking(booking) {
@@ -128,14 +155,20 @@ document.addEventListener("DOMContentLoaded", () => {
   // Check if session already exists
   const savedUser = sessionStorage.getItem("rail_session");
   if (savedUser) {
-    currentUser = JSON.parse(savedUser);
-    showApp();
+    try {
+      currentUser = JSON.parse(savedUser);
+      showApp();
+    } catch (e) {
+      sessionStorage.removeItem("rail_session");
+    }
   }
+
+  safeCreateIcons();
 });
 
 // ==================== AUTHENTICATION ====================
 function handleLogin(event) {
-  event.preventDefault();
+  if (event) event.preventDefault();
   const usernameInput = document.getElementById("loginUsername").value.trim().toLowerCase();
   const passwordInput = document.getElementById("loginPassword").value;
   const alertEl = document.getElementById("loginAlert");
@@ -152,7 +185,7 @@ function handleLogin(event) {
   } else {
     alertEl.classList.remove("hidden");
     document.getElementById("loginAlertTitle").innerText = "Access Denied!";
-    document.getElementById("loginAlertMessage").innerText = "Invalid username or password. Please verify your credentials.";
+    document.getElementById("loginAlertMessage").innerText = "Invalid username or password. Please use admin / admin123 or rohan / pass123.";
   }
 }
 
@@ -160,27 +193,40 @@ function quickFillLogin(username, password) {
   document.getElementById("loginUsername").value = username;
   document.getElementById("loginPassword").value = password;
   document.getElementById("loginAlert").classList.add("hidden");
+  handleLogin();
 }
 
 function handleLogout() {
-  if (confirm("Are you sure you want to log out?")) {
-    sessionStorage.removeItem("rail_session");
-    currentUser = null;
-    document.getElementById("loginSection").classList.remove("hidden");
-    document.getElementById("appSection").classList.add("hidden");
-    document.getElementById("loginForm").reset();
-    document.getElementById("loginAlert").classList.add("hidden");
-  }
+  sessionStorage.removeItem("rail_session");
+  currentUser = null;
+  document.getElementById("loginSection").classList.remove("hidden");
+  document.getElementById("appSection").classList.add("hidden");
+  document.getElementById("loginAlert").classList.add("hidden");
+  safeCreateIcons();
 }
 
 function showApp() {
-  document.getElementById("loginSection").classList.add("hidden");
-  document.getElementById("appSection").classList.remove("hidden");
-  document.getElementById("navUserName").innerText = currentUser.fullName;
-  document.getElementById("navUserRole").innerText = currentUser.role;
+  try {
+    const loginSec = document.getElementById("loginSection");
+    const appSec = document.getElementById("appSection");
 
-  renderBookingsTable();
-  lucide.createIcons();
+    loginSec.classList.add("hidden");
+    appSec.classList.remove("hidden");
+
+    if (currentUser) {
+      const nameEl = document.getElementById("navUserName");
+      const roleEl = document.getElementById("navUserRole");
+      if (nameEl) nameEl.innerText = currentUser.fullName || currentUser.username;
+      if (roleEl) roleEl.innerText = currentUser.role || "USER";
+    }
+
+    renderBookingsTable();
+    safeCreateIcons();
+  } catch (err) {
+    console.error("Error displaying app:", err);
+    document.getElementById("loginSection").style.display = "none";
+    document.getElementById("appSection").style.display = "flex";
+  }
 }
 
 // ==================== TAB NAVIGATION ====================
@@ -194,7 +240,8 @@ function switchTab(tabId) {
   });
 
   // Show active tab
-  document.getElementById(tabId).classList.remove("hidden");
+  const target = document.getElementById(tabId);
+  if (target) target.classList.remove("hidden");
 
   // Highlight active button
   const activeBtnMap = {
@@ -212,7 +259,7 @@ function switchTab(tabId) {
   if (tabId === "myBookingsTab") {
     renderBookingsTable();
   }
-  lucide.createIcons();
+  safeCreateIcons();
 }
 
 // ==================== TRAIN AUTO-POPULATION ====================
@@ -261,6 +308,14 @@ function selectTrainForBooking(train) {
   switchTab("bookingTab");
   closeTrainPickerModal();
   showToast(`Auto-populated train ${train.number} - ${train.name}!`);
+}
+
+function selectTrainByNumber(num) {
+  const trains = Database.getTrains();
+  const train = trains.find(t => t.number === num);
+  if (train) {
+    selectTrainForBooking(train);
+  }
 }
 
 // ==================== RESERVATION BOOKING ====================
@@ -355,7 +410,14 @@ function showConfirmationModal(booking) {
   document.getElementById("modalRoute").innerText = `${booking.source} ➔ ${booking.destination}`;
 
   document.getElementById("confirmationModal").classList.remove("hidden");
-  lucide.createIcons();
+  safeCreateIcons();
+}
+
+function viewBookingByPnr(pnr) {
+  const booking = Database.findBookingByPNR(pnr);
+  if (booking) {
+    showConfirmationModal(booking);
+  }
 }
 
 function closeConfirmationModal() {
@@ -371,7 +433,7 @@ function copyPnrToClipboard() {
 
 // ==================== CANCELLATION WORKFLOW ====================
 function handleFetchPNR(event) {
-  event.preventDefault();
+  if (event) event.preventDefault();
   const pnr = document.getElementById("cancelPnrInput").value.trim();
 
   if (!pnr) {
@@ -395,7 +457,7 @@ function handleFetchPNR(event) {
 
     emptyState.classList.add("hidden");
     resultCard.classList.remove("hidden");
-    lucide.createIcons();
+    safeCreateIcons();
     showToast("Booking details retrieved successfully!", "success");
   } else {
     currentCancellationBooking = null;
@@ -409,7 +471,7 @@ function promptConfirmCancellation() {
   if (!currentCancellationBooking) return;
   document.getElementById("cancelDialogPnr").innerText = currentCancellationBooking.pnr;
   document.getElementById("cancelConfirmModal").classList.remove("hidden");
-  lucide.createIcons();
+  safeCreateIcons();
 }
 
 function closeCancelConfirmModal() {
@@ -439,8 +501,7 @@ function executeCancellation() {
 function navigateToCancel(pnr) {
   switchTab("cancelTab");
   document.getElementById("cancelPnrInput").value = pnr;
-  document.getElementById("cancelPnrInput").dispatchEvent(new Event("submit"));
-  handleFetchPNR(new Event("submit"));
+  handleFetchPNR();
 }
 
 // ==================== ALL BOOKINGS TABLE ====================
@@ -448,11 +509,12 @@ function renderBookingsTable(filterQuery = "") {
   let bookings = Database.getBookings();
 
   // If regular user, filter to user bookings; if admin, show all
+  const noteEl = document.getElementById("bookingsFilterNote");
   if (currentUser && currentUser.role !== "ADMIN") {
     bookings = bookings.filter(b => b.bookedBy === currentUser.username);
-    document.getElementById("bookingsFilterNote").innerText = `Displaying reservations booked by ${currentUser.fullName} (${currentUser.username}).`;
+    if (noteEl) noteEl.innerText = `Displaying reservations booked by ${currentUser.fullName} (${currentUser.username}).`;
   } else {
-    document.getElementById("bookingsFilterNote").innerText = `Displaying all system reservations (Admin Mode).`;
+    if (noteEl) noteEl.innerText = `Displaying all system reservations (Admin Mode).`;
   }
 
   // Search filter
@@ -465,17 +527,20 @@ function renderBookingsTable(filterQuery = "") {
     );
   }
 
-  document.getElementById("bookingCountBadge").innerText = bookings.length;
+  const countBadge = document.getElementById("bookingCountBadge");
+  if (countBadge) countBadge.innerText = bookings.length;
 
   const tbody = document.getElementById("bookingsTableBody");
   const empty = document.getElementById("bookingsTableEmpty");
+  if (!tbody) return;
+
   tbody.innerHTML = "";
 
   if (bookings.length === 0) {
-    empty.classList.remove("hidden");
+    if (empty) empty.classList.remove("hidden");
     return;
   }
-  empty.classList.add("hidden");
+  if (empty) empty.classList.add("hidden");
 
   bookings.forEach(b => {
     const tr = document.createElement("tr");
@@ -495,7 +560,7 @@ function renderBookingsTable(filterQuery = "") {
         </span>
       </td>
       <td class="py-3 px-4 text-right space-x-1">
-        <button onclick="showConfirmationModal(${JSON.stringify(b).replace(/"/g, '&quot;')})" 
+        <button onclick="viewBookingByPnr('${b.pnr}')" 
           class="p-1 hover:bg-blue-50 text-blue-600 rounded" title="View Ticket">
           <i data-lucide="eye" class="w-4 h-4"></i>
         </button>
@@ -508,7 +573,7 @@ function renderBookingsTable(filterQuery = "") {
     tbody.appendChild(tr);
   });
 
-  lucide.createIcons();
+  safeCreateIcons();
 }
 
 function filterBookingsTable(query) {
@@ -529,6 +594,7 @@ function renderTrainDirectory(filterQuery = "") {
   }
 
   const tbody = document.getElementById("trainDirectoryBody");
+  if (!tbody) return;
   tbody.innerHTML = "";
 
   trains.forEach(t => {
@@ -540,7 +606,7 @@ function renderTrainDirectory(filterQuery = "") {
       <td class="py-3 px-4 text-slate-600">${t.source}</td>
       <td class="py-3 px-4 text-slate-600">${t.destination}</td>
       <td class="py-3 px-4 text-right">
-        <button onclick='selectTrainForBooking(${JSON.stringify(t)})'
+        <button onclick="selectTrainByNumber(${t.number})"
           class="px-2.5 py-1 bg-rail-50 hover:bg-rail-100 text-rail-700 font-semibold text-xs rounded-lg border border-rail-200 transition">
           Book This Train
         </button>
@@ -549,7 +615,7 @@ function renderTrainDirectory(filterQuery = "") {
     tbody.appendChild(tr);
   });
 
-  lucide.createIcons();
+  safeCreateIcons();
 }
 
 function filterTrainDirectory(query) {
@@ -565,7 +631,7 @@ function openTrainPickerModal() {
   trains.forEach(t => {
     const div = document.createElement("div");
     div.className = "p-3 hover:bg-slate-50 cursor-pointer flex items-center justify-between transition";
-    div.onclick = () => selectTrainForBooking(t);
+    div.onclick = () => selectTrainByNumber(t.number);
     div.innerHTML = `
       <div>
         <span class="font-bold font-mono text-rail-900">${t.number}</span>
@@ -578,7 +644,7 @@ function openTrainPickerModal() {
   });
 
   document.getElementById("trainPickerModal").classList.remove("hidden");
-  lucide.createIcons();
+  safeCreateIcons();
 }
 
 function closeTrainPickerModal() {
@@ -596,7 +662,7 @@ function filterPickerList(query) {
   trains.forEach(t => {
     const div = document.createElement("div");
     div.className = "p-3 hover:bg-slate-50 cursor-pointer flex items-center justify-between transition";
-    div.onclick = () => selectTrainForBooking(t);
+    div.onclick = () => selectTrainByNumber(t.number);
     div.innerHTML = `
       <div>
         <span class="font-bold font-mono text-rail-900">${t.number}</span>
@@ -612,6 +678,7 @@ function filterPickerList(query) {
 // ==================== USER REGISTRATION ====================
 function openRegisterModal() {
   document.getElementById("registerModal").classList.remove("hidden");
+  safeCreateIcons();
 }
 
 function closeRegisterModal() {
@@ -648,7 +715,7 @@ function handleRegisterSubmit(event) {
 function showToast(message, type = "info") {
   const toast = document.getElementById("toastNotification");
   const msgEl = document.getElementById("toastMessage");
-  const iconEl = document.getElementById("toastIcon");
+  if (!toast || !msgEl) return;
 
   msgEl.innerText = message;
   toast.classList.remove("translate-y-20", "opacity-0");

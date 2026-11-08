@@ -74,8 +74,8 @@
             <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Username</label>
             <div class="relative">
               <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
-              <input type="text" id="loginUsername" required placeholder="e.g. admin or rohan"
-                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rail-500 focus:bg-white transition-all">
+              <input type="text" id="loginUsername" required value="rohan" placeholder="e.g. admin or rohan"
+                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rail-500 focus:bg-white transition-all font-medium">
             </div>
           </div>
 
@@ -83,17 +83,25 @@
             <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Password</label>
             <div class="relative">
               <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
-              <input type="password" id="loginPassword" required placeholder="Enter password"
+              <input type="password" id="loginPassword" required value="pass123" placeholder="Enter password"
                 class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rail-500 focus:bg-white transition-all">
             </div>
           </div>
 
           <button type="submit"
-            class="w-full py-2.5 px-4 bg-rail-800 hover:bg-rail-700 active:scale-[0.99] text-white font-medium text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 mt-2">
-            <span>Sign In to Account</span>
+            class="w-full py-3 px-4 bg-rail-800 hover:bg-rail-700 active:scale-[0.99] text-white font-semibold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 mt-2">
+            <span>Sign In to Dashboard</span>
             <i data-lucide="arrow-right" class="w-4 h-4"></i>
           </button>
         </form>
+
+        <!-- Quick 1-Click Instant Enter Button -->
+        <div class="mt-4">
+          <button onclick="quickFillLogin('rohan', 'pass123')" type="button"
+            class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-2">
+            <span>🚀 1-Click Instant Access (Rohan)</span>
+          </button>
+        </div>
 
         <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
           <span class="text-slate-500">Need an account?</span>
@@ -656,8 +664,9 @@
   <!-- JavaScript -->
   <script src="app.js"></script>
   <script>
-    // Initialize Lucide icons on page load
-    lucide.createIcons();
+    // Initialize Lucide icons on page load safely
+    safeCreateIcons();
   </script>
 </body>
 </html>
+
