@@ -102,7 +102,7 @@ public class DatabaseManager {
                     // Another test user
                     pstmt.setString(1, "rohan");
                     pstmt.setString(2, PasswordUtil.hashPassword("pass123"));
-                    pstmt.setString(3, "Rohan Sharma");
+                    pstmt.setString(3, "Rohan Dahake");
                     pstmt.setString(4, "USER");
                     pstmt.executeUpdate();
 

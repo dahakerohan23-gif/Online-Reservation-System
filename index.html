@@ -699,7 +699,7 @@ const DEFAULT_TRAINS = [
 
 const DEFAULT_USERS = [
   { username: "admin", password: "admin123", fullName: "System Administrator", role: "ADMIN" },
-  { username: "rohan", password: "pass123", fullName: "Rohan Sharma", role: "USER" },
+  { username: "rohan", password: "pass123", fullName: "Rohan Dahake", role: "USER" },
   { username: "user", password: "user123", fullName: "Demo Passenger", role: "USER" }
 ];
 
@@ -738,12 +738,32 @@ class Database {
     try {
       if (!localStorage.getItem("rail_users")) {
         localStorage.setItem("rail_users", JSON.stringify(DEFAULT_USERS));
+      } else {
+        // Auto-update to Rohan Dahake if old demo name was saved
+        const users = JSON.parse(localStorage.getItem("rail_users") || "[]");
+        let updated = false;
+        users.forEach(u => {
+          if (u.username === "rohan") {
+            u.fullName = "Rohan Dahake";
+            updated = true;
+          }
+        });
+        if (updated) {
+          localStorage.setItem("rail_users", JSON.stringify(users));
+        }
       }
       if (!localStorage.getItem("rail_trains")) {
         localStorage.setItem("rail_trains", JSON.stringify(DEFAULT_TRAINS));
       }
       if (!localStorage.getItem("rail_bookings")) {
         localStorage.setItem("rail_bookings", JSON.stringify(DEFAULT_BOOKINGS));
+      }
+
+      // Also auto-update active session if present
+      const sessionUser = JSON.parse(sessionStorage.getItem("rail_session") || "null");
+      if (sessionUser && sessionUser.username === "rohan") {
+        sessionUser.fullName = "Rohan Dahake";
+        sessionStorage.setItem("rail_session", JSON.stringify(sessionUser));
       }
     } catch (e) {
       console.warn("Storage error:", e);

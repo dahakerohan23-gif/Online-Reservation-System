@@ -34,7 +34,7 @@ const DEFAULT_TRAINS = [
 
 const DEFAULT_USERS = [
   { username: "admin", password: "admin123", fullName: "System Administrator", role: "ADMIN" },
-  { username: "rohan", password: "pass123", fullName: "Rohan Sharma", role: "USER" },
+  { username: "rohan", password: "pass123", fullName: "Rohan Dahake", role: "USER" },
   { username: "user", password: "user123", fullName: "Demo Passenger", role: "USER" }
 ];
 
